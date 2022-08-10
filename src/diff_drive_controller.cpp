@@ -154,6 +154,7 @@ namespace diff_drive_controller{
     , right_wheel_radius_multiplier_(1.0)
     , cmd_vel_timeout_(0.5)
     , allow_multiple_cmd_vel_publishers_(true)
+    , estimate_velocity_(true)
     , base_frame_id_("base_link")
     , odom_frame_id_("odom")
     , enable_odom_tf_(true)
@@ -241,6 +242,10 @@ namespace diff_drive_controller{
     controller_nh.param("allow_multiple_cmd_vel_publishers", allow_multiple_cmd_vel_publishers_, allow_multiple_cmd_vel_publishers_);
     ROS_INFO_STREAM_NAMED(name_, "Allow mutiple cmd_vel publishers is "
                           << (allow_multiple_cmd_vel_publishers_?"enabled":"disabled"));
+
+    controller_nh.param("estimate_velocity", estimate_velocity_, estimate_velocity_);
+    ROS_INFO_STREAM_NAMED(name_, "Estimating velocity from positions is "
+                          << (estimate_velocity_?"enabled":"disabled"));
 
     controller_nh.param("base_frame_id", base_frame_id_, base_frame_id_);
     ROS_INFO_STREAM_NAMED(name_, "Base frame_id set to " << base_frame_id_);
@@ -409,21 +414,37 @@ namespace diff_drive_controller{
     {
       double left_pos  = 0.0;
       double right_pos = 0.0;
+      double left_vel = 0.0;
+      double right_vel = 0.0;
       for (size_t i = 0; i < wheel_joints_size_; ++i)
       {
         const double lp = left_wheel_joints_[i].getPosition();
         const double rp = right_wheel_joints_[i].getPosition();
+        const double lv = left_wheel_joints_[i].getVelocity();
+        const double rv = right_wheel_joints_[i].getVelocity();
         if (std::isnan(lp) || std::isnan(rp))
           return;
 
         left_pos  += lp;
         right_pos += rp;
+        left_vel  += lv;
+        right_vel += rv;
       }
       left_pos  /= wheel_joints_size_;
       right_pos /= wheel_joints_size_;
 
-      // Estimate linear and angular velocity using joint information
-      odometry_.update(left_pos, right_pos, time);
+      left_vel  /= wheel_joints_size_;
+      right_vel /= wheel_joints_size_;
+
+
+      if (estimate_velocity_)
+      {// Estimate linear and angular velocity using joint information
+          odometry_.updateWithVelEst(left_pos, right_pos, time);
+      }
+      else
+      {
+          odometry_.update(left_pos, right_pos, left_vel, right_vel, time);
+      }
     }
 
     // Publish odometry message

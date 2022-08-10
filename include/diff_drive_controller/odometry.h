@@ -84,7 +84,18 @@ namespace diff_drive_controller
      * \param time      Current time
      * \return true if the odometry is actually updated
      */
-    bool update(double left_pos, double right_pos, const ros::Time &time);
+    bool updateWithVelEst(double left_pos, double right_pos, const ros::Time &time);
+
+    /**
+    * \brief Updates the odometry class with latest wheels position
+    * \param left_pos  Left  wheel position [rad]
+    * \param right_pos Right wheel position [rad]
+    * \param left_vel  Left  wheel velocity [rad]
+    * \param right_vel Right wheel velocity [rad]
+    * \param time      Current time
+    * \return true if the odometry is actually updated
+    */
+    bool update(double left_pos, double right_pos, double left_vel, double right_vel, const ros::Time &time);
 
     /**
      * \brief Updates the odometry class with latest velocity command
@@ -127,7 +138,7 @@ namespace diff_drive_controller
      */
     double getLinear() const
     {
-      return linear_;
+      return linear_vel_;
     }
 
     /**
@@ -136,7 +147,7 @@ namespace diff_drive_controller
      */
     double getAngular() const
     {
-      return angular_;
+      return angular_vel_;
     }
 
     /**
@@ -187,24 +198,24 @@ namespace diff_drive_controller
     double heading_;  // [rad]
 
     /// Current velocity:
-    double linear_;  //   [m/s]
-    double angular_; // [rad/s]
+    double linear_vel_;  //   [m/s]
+    double angular_vel_; // [rad/s]
 
     /// Wheel kinematic parameters [m]:
     double wheel_separation_;
     double left_wheel_radius_;
     double right_wheel_radius_;
 
-    /// Previou wheel position/state [rad]:
+    /// Previous wheel position/state [rad]:
     double left_wheel_old_pos_;
     double right_wheel_old_pos_;
 
-    /// Rolling mean accumulators for the linar and angular velocities:
+    /// Rolling mean accumulators for the linear and angular velocities:
     size_t velocity_rolling_window_size_;
-    RollingMeanAcc linear_acc_;
-    RollingMeanAcc angular_acc_;
+    RollingMeanAcc linear_accum_;
+    RollingMeanAcc angular_accum_;
 
-    /// Integration funcion, used to integrate the odometry:
+    /// Integration function, used to integrate the odometry:
     IntegrationFunction integrate_fun_;
   };
 }

@@ -163,6 +163,9 @@ namespace diff_drive_controller{
     /// Whether to allow multiple publishers on cmd_vel topic or not:
     bool allow_multiple_cmd_vel_publishers_;
 
+    /// Whether to estimate joint velocity or get it from the joint:
+    bool estimate_velocity_;
+
     /// Frame to use for the robot base:
     std::string base_frame_id_;
 
