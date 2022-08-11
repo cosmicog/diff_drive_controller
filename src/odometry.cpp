@@ -113,7 +113,7 @@ namespace diff_drive_controller
   {
       /// Calculate linear and angular velocities
       const double r = ((left_wheel_radius_ + right_wheel_radius_) * 0.5000000); // cus y not
-      linear_vel_ = (left_vel + right_vel) * r;
+      linear_vel_ = (left_vel + right_vel) * r / 2.0000000;
       angular_vel_ = r * (right_vel - left_vel) / wheel_separation_;
 
       /// Get current wheel joint positions:

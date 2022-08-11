@@ -90,8 +90,8 @@ namespace diff_drive_controller
     * \brief Updates the odometry class with latest wheels position
     * \param left_pos  Left  wheel position [rad]
     * \param right_pos Right wheel position [rad]
-    * \param left_vel  Left  wheel velocity [rad]
-    * \param right_vel Right wheel velocity [rad]
+    * \param left_vel  Left  wheel velocity [rad/s]
+    * \param right_vel Right wheel velocity [rad/s]
     * \param time      Current time
     * \return true if the odometry is actually updated
     */
