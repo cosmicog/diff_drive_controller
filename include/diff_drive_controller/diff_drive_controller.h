@@ -166,6 +166,9 @@ namespace diff_drive_controller{
     /// Whether to estimate joint velocity or get it from the joint:
     bool estimate_velocity_;
 
+    /// Enable to stop immediately without limits.
+    bool emergency_brake_;
+
     /// Frame to use for the robot base:
     std::string base_frame_id_;
 
@@ -204,6 +207,7 @@ namespace diff_drive_controller{
 
       double publish_rate;
       bool enable_odom_tf;
+      bool emergency_brake;
 
       DynamicParams()
         : left_wheel_radius_multiplier(1.0)
@@ -212,6 +216,7 @@ namespace diff_drive_controller{
         , publish_cmd(false)
         , publish_rate(50)
         , enable_odom_tf(true)
+        , emergency_brake(false)
       {}
 
       friend std::ostream& operator<<(std::ostream& os, const DynamicParams& params)

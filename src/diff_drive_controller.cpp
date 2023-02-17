@@ -155,6 +155,7 @@ namespace diff_drive_controller{
     , cmd_vel_timeout_(0.5)
     , allow_multiple_cmd_vel_publishers_(true)
     , estimate_velocity_(true)
+    , emergency_brake_(false)
     , base_frame_id_("base_link")
     , odom_frame_id_("odom")
     , enable_odom_tf_(true)
@@ -246,6 +247,10 @@ namespace diff_drive_controller{
     controller_nh.param("estimate_velocity", estimate_velocity_, estimate_velocity_);
     ROS_INFO_STREAM_NAMED(name_, "Estimating velocity from positions is "
                           << (estimate_velocity_?"enabled":"disabled"));
+
+    controller_nh.param("emergency_brake", emergency_brake_, emergency_brake_);
+    ROS_WARN_STREAM_NAMED(name_, "Starting with EMERGENCY BRAKE: "
+          << (estimate_velocity_?"on":"off"));
 
     controller_nh.param("base_frame_id", base_frame_id_, base_frame_id_);
     ROS_INFO_STREAM_NAMED(name_, "Base frame_id set to " << base_frame_id_);
@@ -368,6 +373,7 @@ namespace diff_drive_controller{
 
     dynamic_params.publish_rate = publish_rate;
     dynamic_params.enable_odom_tf = enable_odom_tf_;
+    dynamic_params.emergency_brake = emergency_brake_;
 
     dynamic_params_.writeFromNonRT(dynamic_params);
 
@@ -379,6 +385,7 @@ namespace diff_drive_controller{
 
     config.publish_rate = publish_rate;
     config.enable_odom_tf = enable_odom_tf_;
+    config.emergency_brake = emergency_brake_;
 
     dyn_reconf_server_ = std::make_shared<ReconfigureServer>(dyn_reconf_server_mutex_, controller_nh);
 
@@ -500,6 +507,13 @@ namespace diff_drive_controller{
     last1_cmd_ = last0_cmd_;
     last0_cmd_ = curr_cmd;
 
+    if (emergency_brake_)
+    {
+      brake();
+      curr_cmd.lin = 0.0;
+      curr_cmd.ang = 0.0;
+    }
+
     // Publish limited velocity:
     if (publish_cmd_ && cmd_vel_pub_ && cmd_vel_pub_->trylock())
     {
@@ -548,6 +562,10 @@ namespace diff_drive_controller{
       left_wheel_joints_[i].setCommand(vel);
       right_wheel_joints_[i].setCommand(vel);
     }
+    last0_cmd_.lin = 0.0;
+    last0_cmd_.ang = 0.0;
+    last1_cmd_.lin = 0.0;
+    last1_cmd_.ang = 0.0;
   }
 
   void DiffDriveController::cmdVelCallback(const geometry_msgs::Twist& command)
@@ -765,6 +783,8 @@ namespace diff_drive_controller{
 
     dynamic_params.enable_odom_tf = config.enable_odom_tf;
 
+    dynamic_params.emergency_brake = config.emergency_brake;
+
     dynamic_params_.writeFromNonRT(dynamic_params);
 
     ROS_INFO_STREAM_NAMED(name_, "Dynamic Reconfigure:\n" << dynamic_params);
@@ -781,6 +801,7 @@ namespace diff_drive_controller{
 
     publish_period_ = ros::Duration(1.0 / dynamic_params.publish_rate);
     enable_odom_tf_ = dynamic_params.enable_odom_tf;
+    emergency_brake_ = dynamic_params.emergency_brake;
   }
 
   void DiffDriveController::publishWheelData(const ros::Time& time, const ros::Duration& period, Commands& curr_cmd,
