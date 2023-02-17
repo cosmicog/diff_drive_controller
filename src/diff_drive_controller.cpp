@@ -250,7 +250,7 @@ namespace diff_drive_controller{
 
     controller_nh.param("emergency_brake", emergency_brake_, emergency_brake_);
     ROS_WARN_STREAM_NAMED(name_, "Starting with EMERGENCY BRAKE: "
-          << (estimate_velocity_?"on":"off"));
+          << (emergency_brake_?"on":"off"));
 
     controller_nh.param("base_frame_id", base_frame_id_, base_frame_id_);
     ROS_INFO_STREAM_NAMED(name_, "Base frame_id set to " << base_frame_id_);
