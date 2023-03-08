@@ -230,8 +230,8 @@ namespace diff_drive_controller{
            //
            << "\tPublication parameters:\n"
            << "\t\tPublish executed velocity command: " << (params.publish_cmd?"enabled":"disabled") << "\n"
-           << "\t\tPublication rate: " << params.publish_rate                 << "\n"
-           << "\t\tPublish frame odom on tf: " << (params.enable_odom_tf?"enabled":"disabled")
+           << "\t\tPublication rate: " << params.publish_rate                                        << "\n"
+           << "\t\tPublish frame odom on tf: " << (params.enable_odom_tf?"enabled":"disabled")       << "\n"
            //
            << "\tVelocity parameters:\n"
            << "\t\tEmergency brake: " << (params.emergency_brake?"enabled":"disabled");
